@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>📉 Unemployment Analysis — CodeAlpha</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#0D1117;--card:#1E2530;--border:#30363D;
+  --text:#E6EDF3;--muted:#8B949E;--gold:#FFD54F;
+  --red:#FF6B6B;--green:#69DB7C;--blue:#74C0FC;
+  --orange:#FFA94D;--purple:#DA77F2;--teal:#38D9A9;--accent:#7C4DFF;
+  --north:#FF6B6B;--south:#74C0FC;--east:#69DB7C;--west:#FFA94D;--ne:#DA77F2;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;overflow-x:hidden;}
+
+.hero{position:relative;padding:56px 40px 40px;text-align:center;
+      background:radial-gradient(ellipse 80% 55% at 50% 0%,#0d1a2e 0%,var(--bg) 70%);}
+.badge{display:inline-block;background:rgba(255,107,107,.15);border:1px solid var(--red);
+       color:#ffb3b3;padding:4px 14px;border-radius:20px;font-size:.73rem;
+       font-family:'DM Mono',monospace;letter-spacing:.1em;margin-bottom:14px;}
+h1{font-family:'Playfair Display',serif;font-size:clamp(1.9rem,5vw,3.2rem);font-weight:900;
+   background:linear-gradient(135deg,#FF6B6B,#FFA94D,#FFD54F);
+   -webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1.15;margin-bottom:10px;}
+.hero-sub{color:var(--muted);font-size:.92rem;max-width:600px;margin:0 auto 30px;line-height:1.7;}
+.stat-row{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;}
+.stat-pill{background:var(--card);border:1px solid var(--border);border-radius:16px;
+           padding:13px 22px;text-align:center;min-width:110px;}
+.stat-pill .num{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:700;color:var(--gold);}
+.stat-pill .lbl{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;}
+
+.container{max-width:1280px;margin:0 auto;padding:0 22px 60px;}
+.sec-title{font-family:'Playfair Display',serif;font-size:1.45rem;font-weight:700;
+           margin:42px 0 16px;display:flex;align-items:center;gap:10px;}
+.grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:18px;}
+.grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;}
+.grid-4{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:20px;
+      padding:22px;position:relative;overflow:hidden;}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+              background:linear-gradient(90deg,var(--red),var(--orange));}
+.card-title{font-size:.8rem;font-weight:600;text-transform:uppercase;
+            letter-spacing:.1em;color:var(--muted);margin-bottom:16px;}
+
+/* COVID COMPARISON */
+.covid-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+.covid-card{border-radius:14px;padding:20px;text-align:center;}
+.covid-card.pre{background:linear-gradient(135deg,#0a2e14,#0d3a19);border:1px solid #69DB7C40;}
+.covid-card.post{background:linear-gradient(135deg,#2e0a0a,#3a0d0d);border:1px solid #FF6B6B40;}
+.covid-num{font-family:'Playfair Display',serif;font-size:2.4rem;font-weight:700;}
+.covid-card.pre .covid-num{color:var(--green);}
+.covid-card.post .covid-num{color:var(--red);}
+.covid-lbl{font-size:.78rem;color:var(--muted);margin-top:4px;}
+
+/* INSIGHT CARDS */
+.insight-card{border-radius:16px;padding:20px;border:1px solid var(--border);}
+.insight-card.i1{background:linear-gradient(135deg,#1a0d0d,#2e1515);border-color:#FF6B6B30;}
+.insight-card.i2{background:linear-gradient(135deg,#1a160d,#2e2315);border-color:#FFA94D30;}
+.insight-card.i3{background:linear-gradient(135deg,#0d1a1a,#152e2e);border-color:#38D9A930;}
+.insight-card.i4{background:linear-gradient(135deg,#0d0d1a,#15152e);border-color:#7C4DFF30;}
+.insight-icon{font-size:1.8rem;margin-bottom:8px;}
+.insight-title{font-size:.88rem;font-weight:600;color:var(--text);margin-bottom:6px;}
+.insight-text{font-size:.8rem;color:var(--muted);line-height:1.6;}
+.insight-highlight{color:var(--gold);font-weight:600;}
+
+/* ZONE LEGEND */
+.zone-legend{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:14px;}
+.zone-dot{display:flex;align-items:center;gap:6px;font-size:.78rem;color:var(--muted);}
+.dot{width:11px;height:11px;border-radius:50%;display:inline-block;}
+
+/* STATE TABLE */
+.state-table{width:100%;border-collapse:collapse;}
+.state-table th{font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;
+                color:var(--muted);padding:8px 10px;border-bottom:1px solid var(--border);text-align:left;}
+.state-table td{padding:9px 10px;font-size:.86rem;border-bottom:1px solid #1a2040;}
+.state-table tr:last-child td{border-bottom:none;}
+.state-bar{height:6px;border-radius:3px;margin-top:3px;}
+.rank-badge{display:inline-block;width:22px;height:22px;border-radius:50%;
+            background:var(--accent);color:white;font-size:.7rem;
+            font-weight:700;text-align:center;line-height:22px;}
+
+/* TABS */
+.tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+.tab{padding:6px 14px;border-radius:10px;border:1px solid var(--border);background:transparent;
+     color:var(--muted);cursor:pointer;font-size:.8rem;transition:all .2s;}
+.tab.active{background:var(--red);border-color:var(--red);color:white;}
+
+footer{text-align:center;padding:26px;color:var(--muted);font-size:.78rem;border-top:1px solid var(--border);}
+footer strong{color:var(--text);}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="badge">CodeAlpha Data Science Internship · Task 2</div>
+  <h1>📉 Unemployment Analysis<br/>India 2020</h1>
+  <p class="hero-sub">A comprehensive analysis of India's unemployment crisis during the Covid-19 pandemic — state-wise breakdown, regional patterns, and recovery trends.</p>
+  <div class="stat-row">
+    <div class="stat-pill"><div class="num">27</div><div class="lbl">States</div></div>
+    <div class="stat-pill"><div class="num">10</div><div class="lbl">Months</div></div>
+    <div class="stat-pill"><div class="num" style="color:var(--red)">23.24%</div><div class="lbl">Peak Rate</div></div>
+    <div class="stat-pill"><div class="num" style="color:var(--orange)">36.1%</div><div class="lbl">Covid Rise</div></div>
+    <div class="stat-pill"><div class="num" style="color:var(--green)">8.24%</div><div class="lbl">Best Zone</div></div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- COVID IMPACT -->
+  <div class="sec-title">🦠 Covid-19 Impact</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Pre vs Post Lockdown Comparison</div>
+      <div class="covid-grid">
+        <div class="covid-card pre">
+          <div class="covid-num">9.76%</div>
+          <div class="covid-lbl">🟢 Pre-COVID Average<br/>(Jan – Mar 2020)</div>
+        </div>
+        <div class="covid-card post">
+          <div class="covid-num">13.28%</div>
+          <div class="covid-lbl">🔴 Post-COVID Average<br/>(Apr – Nov 2020)</div>
+        </div>
+      </div>
+      <div style="background:rgba(255,107,107,.08);border:1px solid #FF6B6B30;border-radius:12px;padding:14px;margin-top:6px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-size:.85rem;color:var(--muted)">📈 Covid-19 lockdown caused a</span>
+          <span style="font-family:'DM Mono',monospace;font-size:1.2rem;color:var(--red);font-weight:700">+36.1% rise</span>
+        </div>
+        <div style="margin-top:8px;font-size:.8rem;color:var(--muted)">Peak: <strong style="color:var(--gold)">May 2020 at 23.24%</strong> national average · Puducherry hit <strong style="color:var(--red)">75.85%</strong></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Monthly National Trend</div>
+      <canvas id="trendC" height="200"></canvas>
+    </div>
+  </div>
+
+  <!-- ZONE ANALYSIS -->
+  <div class="sec-title">🧭 Regional Analysis</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Zone-wise Average Unemployment Rate</div>
+      <div class="zone-legend">
+        <span class="zone-dot"><span class="dot" style="background:var(--north)"></span>North</span>
+        <span class="zone-dot"><span class="dot" style="background:var(--east)"></span>East</span>
+        <span class="zone-dot"><span class="dot" style="background:var(--ne)"></span>Northeast</span>
+        <span class="zone-dot"><span class="dot" style="background:var(--south)"></span>South</span>
+        <span class="zone-dot"><span class="dot" style="background:var(--west)"></span>West</span>
+      </div>
+      <canvas id="zoneC" height="220"></canvas>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Top 10 Worst-Hit States (Apr 2020 — Peak Lockdown)</div>
+      <table class="state-table">
+        <thead><tr><th>#</th><th>State</th><th>Rate</th><th>Bar</th></tr></thead>
+        <tbody>
+          <tr><td><span class="rank-badge" style="background:#FF6B6B">1</span></td><td>Puducherry</td><td style="color:var(--red);font-family:'DM Mono',monospace">75.85%</td><td><div class="state-bar" style="width:100%;background:var(--red)"></div></td></tr>
+          <tr><td><span class="rank-badge" style="background:#FF8C42">2</span></td><td>Tamil Nadu</td><td style="color:var(--orange);font-family:'DM Mono',monospace">49.83%</td><td><div class="state-bar" style="width:66%;background:var(--orange)"></div></td></tr>
+          <tr><td><span class="rank-badge" style="background:#FFA94D">3</span></td><td>Jharkhand</td><td style="color:var(--orange);font-family:'DM Mono',monospace">47.09%</td><td><div class="state-bar" style="width:62%;background:var(--orange)"></div></td></tr>
+          <tr><td><span class="rank-badge" style="background:#FFA94D">4</span></td><td>Bihar</td><td style="color:var(--orange);font-family:'DM Mono',monospace">46.64%</td><td><div class="state-bar" style="width:62%;background:var(--orange)"></div></td></tr>
+          <tr><td><span class="rank-badge" style="background:#FFD54F">5</span></td><td>Haryana</td><td style="color:var(--gold);font-family:'DM Mono',monospace">43.22%</td><td><div class="state-bar" style="width:57%;background:var(--gold)"></div></td></tr>
+          <tr><td><span class="rank-badge" style="background:#DA77F2">6</span></td><td>Tripura</td><td style="color:var(--purple);font-family:'DM Mono',monospace">41.23%</td><td><div class="state-bar" style="width:54%;background:var(--purple)"></div></td></tr>
+          <tr><td><span class="rank-badge" style="background:#74C0FC">7</span></td><td>Karnataka</td><td style="color:var(--blue);font-family:'DM Mono',monospace">29.84%</td><td><div class="state-bar" style="width:39%;background:var(--blue)"></div></td></tr>
+          <tr><td><span class="rank-badge" style="background:#69DB7C">8</span></td><td>Odisha</td><td style="color:var(--green);font-family:'DM Mono',monospace">23.76%</td><td><div class="state-bar" style="width:31%;background:var(--green)"></div></td></tr>
+          <tr><td><span class="rank-badge" style="background:#38D9A9">9</span></td><td>Uttar Pradesh</td><td style="color:var(--teal);font-family:'DM Mono',monospace">21.54%</td><td><div class="state-bar" style="width:28%;background:var(--teal)"></div></td></tr>
+          <tr><td><span class="rank-badge" style="background:#7C4DFF">10</span></td><td>Maharashtra</td><td style="color:var(--accent);font-family:'DM Mono',monospace">20.90%</td><td><div class="state-bar" style="width:27%;background:var(--accent)"></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- STATE CHART -->
+  <div class="sec-title">📊 State-wise & Recovery Analysis</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">State Average Unemployment Rate (All Months)</div>
+      <canvas id="stateC" height="340"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-title">Recovery Trends — Top 5 Worst-Hit States</div>
+      <canvas id="recoveryC" height="340"></canvas>
+    </div>
+  </div>
+
+  <!-- KEY INSIGHTS -->
+  <div class="sec-title">💡 Key Insights & Policy Recommendations</div>
+  <div class="grid-2">
+    <div class="insight-card i1">
+      <div class="insight-icon">📈</div>
+      <div class="insight-title">Covid-19 Unemployment Spike</div>
+      <div class="insight-text">National unemployment jumped from <span class="insight-highlight">9.76%</span> to <span class="insight-highlight">13.28%</span> post-lockdown — a <span class="insight-highlight">36.1% relative increase</span>. May 2020 was the peak at <span class="insight-highlight">23.24%</span> national average with Puducherry hitting a record <span class="insight-highlight">75.85%</span>.</div>
+    </div>
+    <div class="insight-card i2">
+      <div class="insight-icon">🧭</div>
+      <div class="insight-title">Regional Disparity</div>
+      <div class="insight-text">North India averaged <span class="insight-highlight">15.89%</span> unemployment — nearly double that of West India at <span class="insight-highlight">8.24%</span>. This reflects structural differences in industry composition, with North being more dependent on informal labour markets.</div>
+    </div>
+    <div class="insight-card i3">
+      <div class="insight-icon">🔄</div>
+      <div class="insight-title">Recovery Pattern</div>
+      <div class="insight-text">June–August 2020 showed strong recovery as unlock phases began. However, rates <span class="insight-highlight">never returned</span> to pre-COVID levels by November 2020, suggesting lasting structural damage to employment, especially in tourism and hospitality sectors.</div>
+    </div>
+    <div class="insight-card i4">
+      <div class="insight-icon">📌</div>
+      <div class="insight-title">Policy Recommendations</div>
+      <div class="insight-text">North & East India need <span class="insight-highlight">targeted MGNREGA expansion</span>. Urban areas need <span class="insight-highlight">gig economy regulation</span> and social protection floors. States like Puducherry and Tamil Nadu need <span class="insight-highlight">tourism sector revival</span> packages to rebuild employment.</div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <strong>CodeAlpha Data Science Internship</strong> · Task 2: Unemployment Analysis with Python<br/>
+  Dataset: India Unemployment Rate (Jan–Nov 2020) · 267 records · 27 States · Python · Pandas · Matplotlib
+</footer>
+
+<script>
+// ── DATA ─────────────────────────────────────────────────
+const MONTHLY = [
+  {m:'Jan',d:'2020-01-31',r:7.34},
+  {m:'Feb',d:'2020-02-29',r:7.18},
+  {m:'Mar',d:'2020-03-31',r:8.75},
+  {m:'Apr',d:'2020-04-30',r:21.03},
+  {m:'May',d:'2020-05-31',r:23.24},
+  {m:'Jun',d:'2020-06-30',r:10.97},
+  {m:'Jul',d:'2020-07-31',r:7.43},
+  {m:'Aug',d:'2020-08-31',r:8.35},
+  {m:'Sep',d:'2020-09-30',r:6.67},
+  {m:'Oct',d:'2020-10-31',r:6.97},
+];
+const ZONE_DATA = [
+  {z:'North',r:15.89,c:'#FF6B6B'},
+  {z:'East',r:13.92,c:'#69DB7C'},
+  {z:'Northeast',r:10.95,c:'#DA77F2'},
+  {z:'South',r:10.45,c:'#74C0FC'},
+  {z:'West',r:8.24,c:'#FFA94D'},
+];
+const STATE_DATA = [
+  {s:'Haryana',r:26.7,z:'North',c:'#FF6B6B'},
+  {s:'Tripura',r:26.2,z:'Northeast',c:'#DA77F2'},
+  {s:'Jharkhand',r:17.5,z:'East',c:'#69DB7C'},
+  {s:'Bihar',r:17.3,z:'East',c:'#69DB7C'},
+  {s:'Delhi',r:15.8,z:'North',c:'#FF6B6B'},
+  {s:'Puducherry',r:15.0,z:'South',c:'#74C0FC'},
+  {s:'Rajasthan',r:14.8,z:'North',c:'#FF6B6B'},
+  {s:'Uttar Pradesh',r:14.5,z:'North',c:'#FF6B6B'},
+  {s:'Odisha',r:13.2,z:'East',c:'#69DB7C'},
+  {s:'Tamil Nadu',r:12.9,z:'South',c:'#74C0FC'},
+  {s:'Maharashtra',r:12.1,z:'West',c:'#FFA94D'},
+  {s:'West Bengal',r:11.8,z:'East',c:'#69DB7C'},
+  {s:'Karnataka',r:11.2,z:'South',c:'#74C0FC'},
+  {s:'Madhya Pradesh',r:10.5,z:'North',c:'#FF6B6B'},
+  {s:'Assam',r:10.3,z:'Northeast',c:'#DA77F2'},
+  {s:'Andhra Pradesh',r:9.6,z:'South',c:'#74C0FC'},
+  {s:'Punjab',r:9.3,z:'North',c:'#FF6B6B'},
+  {s:'Kerala',r:8.8,z:'South',c:'#74C0FC'},
+  {s:'Telangana',r:7.8,z:'South',c:'#74C0FC'},
+  {s:'Uttarakhand',r:7.2,z:'North',c:'#FF6B6B'},
+  {s:'Chhattisgarh',r:6.5,z:'East',c:'#69DB7C'},
+  {s:'Gujarat',r:6.2,z:'West',c:'#FFA94D'},
+  {s:'Goa',r:6.0,z:'West',c:'#FFA94D'},
+  {s:'Himachal Pradesh',r:5.8,z:'North',c:'#FF6B6B'},
+  {s:'Meghalaya',r:5.2,z:'Northeast',c:'#DA77F2'},
+  {s:'Sikkim',r:4.9,z:'Northeast',c:'#DA77F2'},
+  {s:'Jammu & Kashmir',r:4.5,z:'North',c:'#FF6B6B'},
+];
+const RECOVERY = {
+  'Puducherry':  [20.1,75.85,33.3,11.8,8.4,9.1,7.8,7.2,6.5],
+  'Tamil Nadu':  [6.2, 49.83,26.4,8.5, 5.9,6.2,6.0,5.7,5.4],
+  'Jharkhand':   [7.5, 47.09,31.2,6.8, 5.2,5.9,5.5,5.1,4.8],
+  'Bihar':       [10.2,46.64,29.1,8.4, 5.8,6.3,5.9,5.5,5.1],
+  'Haryana':     [14.3,43.22,35.8,22.0,18.2,14.1,13.5,13.1,12.8],
+  'National':    [7.34,21.03,23.24,10.97,7.43,8.35,6.67,6.97,6.5],
+};
+const REC_MONTHS=['Feb','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov'];
+const REC_COLORS=['#FF6B6B','#FFA94D','#DA77F2','#38D9A9','#74C0FC','#FFD54F'];
+
+function setup(id,h){
+  const c=document.getElementById(id);
+  c.width=c.offsetWidth; c.height=h;
+  return c.getContext('2d');
+}
+
+// ── TREND CHART ─────────────────────────────────────────
+function drawTrend(){
+  const ctx=setup('trendC',200);
+  const W=ctx.canvas.width,H=200,p=36;
+  const rates=MONTHLY.map(m=>m.r);
+  const minR=0,maxR=Math.max(...rates)*1.15;
+  const tx=i=>p+(W-2*p)*i/(MONTHLY.length-1);
+  const ty=v=>p+(H-2*p)*(1-(v-minR)/(maxR-minR));
+  // grid
+  ctx.strokeStyle='#30363D'; ctx.lineWidth=1;
+  [0,5,10,15,20,25].forEach(v=>{
+    const y=ty(v); ctx.beginPath();ctx.moveTo(p,y);ctx.lineTo(W-p,y);ctx.stroke();
+    ctx.fillStyle='#8B949E';ctx.font='9px DM Sans';ctx.textAlign='right';
+    ctx.fillText(v+'%',p-4,y+3);
+  });
+  // lockdown band
+  const lx=tx(2);
+  ctx.fillStyle='rgba(255,107,107,0.07)';
+  ctx.fillRect(lx,p,tx(5)-lx,H-2*p);
+  ctx.strokeStyle='#FF6B6B88'; ctx.lineWidth=1.5; ctx.setLineDash([4,4]);
+  ctx.beginPath();ctx.moveTo(lx,p);ctx.lineTo(lx,H-p);ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle='#FF6B6B'; ctx.font='bold 8px DM Sans'; ctx.textAlign='left';
+  ctx.fillText('🔒 Lockdown',lx+3,p+10);
+  // fill
+  ctx.beginPath();
+  MONTHLY.forEach((m,i)=>i===0?ctx.moveTo(tx(i),ty(m.r)):ctx.lineTo(tx(i),ty(m.r)));
+  ctx.lineTo(tx(MONTHLY.length-1),H-p); ctx.lineTo(tx(0),H-p); ctx.closePath();
+  const grad=ctx.createLinearGradient(0,p,0,H-p);
+  grad.addColorStop(0,'rgba(116,192,252,0.3)'); grad.addColorStop(1,'rgba(116,192,252,0.02)');
+  ctx.fillStyle=grad; ctx.fill();
+  // line
+  ctx.beginPath();
+  MONTHLY.forEach((m,i)=>i===0?ctx.moveTo(tx(i),ty(m.r)):ctx.lineTo(tx(i),ty(m.r)));
+  ctx.strokeStyle='#74C0FC'; ctx.lineWidth=2.2; ctx.stroke();
+  // dots & labels
+  MONTHLY.forEach((m,i)=>{
+    const x=tx(i),y=ty(m.r);
+    ctx.beginPath();ctx.arc(x,y,5,0,Math.PI*2);
+    ctx.fillStyle=m.r>15?'#FF6B6B':'#FFD54F'; ctx.fill();
+    ctx.strokeStyle='#74C0FC'; ctx.lineWidth=1.5; ctx.stroke();
+    ctx.fillStyle='#FFD54F'; ctx.font='bold 8px DM Mono'; ctx.textAlign='center';
+    ctx.fillText(m.r+'%',x,y-9);
+    ctx.fillStyle='#8B949E'; ctx.font='9px DM Sans';
+    ctx.fillText(m.m,x,H-p+14);
+  });
+}
+
+// ── ZONE BAR ─────────────────────────────────────────────
+function drawZone(){
+  const ctx=setup('zoneC',220);
+  const W=ctx.canvas.width,H=220,p=40,bw=W*0.1;
+  const maxR=18;
+  const tx=i=>p+(W-2*p)*(i+0.5)/ZONE_DATA.length;
+  const ty=v=>p+(H-2*p)*(1-v/maxR);
+  ctx.strokeStyle='#30363D'; ctx.lineWidth=1;
+  [0,5,10,15].forEach(v=>{
+    const y=ty(v); ctx.beginPath();ctx.moveTo(p,y);ctx.lineTo(W-p,y);ctx.stroke();
+    ctx.fillStyle='#8B949E';ctx.font='9px DM Sans';ctx.textAlign='right';
+    ctx.fillText(v+'%',p-4,y+3);
+  });
+  ZONE_DATA.forEach((z,i)=>{
+    const x=tx(i),barH=H-p-ty(z.r),y=ty(z.r);
+    const grad=ctx.createLinearGradient(0,y,0,H-p);
+    grad.addColorStop(0,z.c+'cc'); grad.addColorStop(1,z.c+'33');
+    ctx.fillStyle=grad;
+    ctx.beginPath();ctx.roundRect(x-bw/2,y,bw,barH,6);ctx.fill();
+    ctx.strokeStyle=z.c; ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.roundRect(x-bw/2,y,bw,barH,6);ctx.stroke();
+    ctx.fillStyle='#FFD54F'; ctx.font='bold 10px DM Mono'; ctx.textAlign='center';
+    ctx.fillText(z.r+'%',x,y-6);
+    ctx.fillStyle=z.c; ctx.font='bold 9px DM Sans';
+    ctx.fillText(z.z,x,H-p+14);
+  });
+}
+
+// ── STATE BAR ─────────────────────────────────────────────
+function drawState(){
+  const ctx=setup('stateC',340);
+  const W=ctx.canvas.width,H=340,pL=110,pR=60,pT=20,pB=20;
+  const n=STATE_DATA.length;
+  const bh=(H-pT-pB)/n*0.72;
+  const maxR=28;
+  const tx=v=>pL+(W-pL-pR)*v/maxR;
+  ctx.strokeStyle='#30363D'; ctx.lineWidth=1;
+  [0,5,10,15,20,25].forEach(v=>{
+    const x=tx(v); ctx.beginPath();ctx.moveTo(x,pT);ctx.lineTo(x,H-pB);ctx.stroke();
+    ctx.fillStyle='#8B949E';ctx.font='8px DM Sans';ctx.textAlign='center';
+    ctx.fillText(v+'%',x,H-pB+12);
+  });
+  STATE_DATA.forEach((s,i)=>{
+    const y=pT+i*(H-pT-pB)/n+((H-pT-pB)/n-bh)/2;
+    const barW=tx(s.r)-pL;
+    const grad=ctx.createLinearGradient(pL,0,tx(s.r),0);
+    grad.addColorStop(0,s.c+'cc'); grad.addColorStop(1,s.c+'44');
+    ctx.fillStyle=grad;
+    ctx.beginPath();ctx.roundRect(pL,y,barW,bh,3);ctx.fill();
+    ctx.fillStyle='#E6EDF3'; ctx.font='8px DM Sans'; ctx.textAlign='right';
+    ctx.fillText(s.s,pL-4,y+bh/2+3);
+    ctx.fillStyle='#FFD54F'; ctx.font='bold 8px DM Mono'; ctx.textAlign='left';
+    ctx.fillText(s.r+'%',tx(s.r)+3,y+bh/2+3);
+  });
+}
+
+// ── RECOVERY CHART ─────────────────────────────────────────
+function drawRecovery(){
+  const ctx=setup('recoveryC',340);
+  const W=ctx.canvas.width,H=340,p=46;
+  const allR=Object.values(RECOVERY).flat();
+  const maxR=Math.max(...allR)*1.1,minR=0;
+  const tx=i=>p+(W-2*p)*i/(REC_MONTHS.length-1);
+  const ty=v=>p+(H-2*p)*(1-(v-minR)/(maxR-minR));
+  ctx.strokeStyle='#30363D'; ctx.lineWidth=1;
+  [0,10,20,30,40,50,60,70].forEach(v=>{
+    if(v>maxR)return;
+    const y=ty(v); ctx.beginPath();ctx.moveTo(p,y);ctx.lineTo(W-p,y);ctx.stroke();
+    ctx.fillStyle='#8B949E';ctx.font='8px DM Sans';ctx.textAlign='right';
+    ctx.fillText(v+'%',p-4,y+3);
+  });
+  REC_MONTHS.forEach((m,i)=>{
+    ctx.fillStyle='#8B949E';ctx.font='9px DM Sans';ctx.textAlign='center';
+    ctx.fillText(m,tx(i),H-p+14);
+  });
+  const entries=Object.entries(RECOVERY);
+  entries.forEach(([name,vals],ci)=>{
+    const col=REC_COLORS[ci];
+    ctx.beginPath();
+    vals.forEach((v,i)=>i===0?ctx.moveTo(tx(i),ty(v)):ctx.lineTo(tx(i),ty(v)));
+    ctx.strokeStyle=col; ctx.lineWidth=name==='National'?2.5:1.8;
+    ctx.setLineDash(name==='National'?[5,3]:[]);
+    ctx.stroke(); ctx.setLineDash([]);
+    vals.forEach((v,i)=>{
+      ctx.beginPath();ctx.arc(tx(i),ty(v),3.5,0,Math.PI*2);
+      ctx.fillStyle=col; ctx.fill();
+    });
+    ctx.fillStyle=col; ctx.font=`${name==='National'?'bold ':''} 8px DM Sans`;
+    ctx.textAlign='left';
+    const last=vals.length-1;
+    ctx.fillText(name==='National'?'⟶ National':name.split(' ')[0],tx(last)+4,ty(vals[last])+3);
+  });
+}
+
+window.addEventListener('load',()=>{
+  drawTrend(); drawZone(); drawState(); drawRecovery();
+});
+window.addEventListener('resize',()=>{
+  drawTrend(); drawZone(); drawState(); drawRecovery();
+});
+</script>
+</body>
+</html>
