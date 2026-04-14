@@ -15,7 +15,7 @@ Built as part of the **CodeAlpha Data Science Internship (Task 2)**.
 |------|-------------|
 | `unemployment_analysis.py` | Main Python script — full EDA, analysis & dashboard |
 | `unemployment_dashboard.png` | 6-panel static visualisation dashboard |
-| `index,html` | Interactive dashboard with charts |
+| `index.html` | Interactive dashboard with charts |
 | `Unemployment_Rate_upto_11_2020.csv` | Dataset — 267 records, 27 states |
 | `README.md` | Project documentation |
 
