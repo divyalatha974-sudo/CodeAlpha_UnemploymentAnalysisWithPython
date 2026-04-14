@@ -109,7 +109,7 @@ python unemployment_analysis.py
 ---
 
 ## 🌐 Interactive Dashboard
-👉 [Open Interactive Dashboard](https://divyalatha974-sudo.github.io/CodeAlpha_UnemploymentAnalysis/unemployment_dashboard.html)
+👉 [Open Interactive Dashboard](https://divyalatha974-sudo.github.io/CodeAlpha_UnemploymentAnalysisWithpython/index.html)
 
 
 
