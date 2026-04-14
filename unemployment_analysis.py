@@ -1,7 +1,7 @@
 # ================================================================
 #   CodeAlpha — Data Science Internship
 #   Task 2   : Unemployment Analysis with Python
-#   Author   : [Your Name]
+#   Author   : [Divya A J]
 #   GitHub   : CodeAlpha_UnemploymentAnalysis
 #   Dataset  : Unemployment Rate upto Nov 2020 (India)
 # ================================================================
